@@ -1,0 +1,18 @@
+ Building the Merkle tree is a problem which seems 
+simple until one attempts to make it fast. At small scales it is fine 
+on the CPU, but the moment leaf counts climb into the tens of 
+thousands — which is routine in any active blockchain or 
+certificate log — the sequential SHA-256 hashing becomes a 
+genuine bottleneck. This paper describes a CUDA implementation 
+that addresses that gap by hashing all leaves at once on a GPU 
+using real SHA-256, not a placeholder. The design uses shared 
+memory tiling inside both the leaf and tree-level kernels, with 
+Thrust handling device buffer management and CUDA Events 
+measuring every stage precisely. Running on an NVIDIA Tesla T4 
+with 18,674 leaves extracted from an actual IEEE paper, it finishes 
+in under 2 ms compared to 78 ms on CPU — a 68.7× speedup — 
+and processes 13.8 million leaves per second. Both kernels hit 
+100% theoretical occupancy. The GPU output was checked byte
+for-byte against Python hashlib to confirm the SHA-256 
+implementation is correct, including the two-block padding case 
+that catches out a lot of GPU hash implementations. 
